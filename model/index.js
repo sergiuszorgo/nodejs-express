@@ -53,7 +53,19 @@ const addContact = async body => {
   }
 }
 
-const updateContact = async (contactId, body) => {}
+const updateContact = async (contactId, body) => {
+  try {
+    const data = await readData()
+    const result = data.find(contact => contact.id === contactId)
+    if (result) {
+      Object.assign(result, body)
+      fs.writeFile(path.join(__dirname, '/contacts.json'), JSON.stringify(data))
+    }
+    return result
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 module.exports = {
   listContacts,
