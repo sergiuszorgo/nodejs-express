@@ -18,7 +18,8 @@ const listContacts = async () => {
 const getContactById = async contactId => {
   try {
     const data = await readData()
-    const [result] = data.filter(contact => contact.id === contactId)
+    // console.log(data)
+    const [result] = data.filter(contact => contact.id === Number(contactId))
     return result
   } catch (error) {
     console.log(error)
@@ -28,7 +29,7 @@ const getContactById = async contactId => {
 const removeContact = async contactId => {
   try {
     const data = await readData()
-    const index = data.findIndex(contact => contact.id === contactId)
+    const index = data.findIndex(contact => contact.id === Number(contactId))
     if (index !== -1) {
       const result = data.splice(index, 1)
       await fs.writeFile(path.join(__dirname, '/contacts.json'), JSON.stringify(data))
@@ -56,7 +57,7 @@ const addContact = async body => {
 const updateContact = async (contactId, body) => {
   try {
     const data = await readData()
-    const result = data.find(contact => contact.id === contactId)
+    const result = data.find(contact => contact.id === Number(contactId))
     if (result) {
       Object.assign(result, body)
       fs.writeFile(path.join(__dirname, '/contacts.json'), JSON.stringify(data))
