@@ -13,10 +13,10 @@ router.get('/:contactId', controller.getContactById)
 
 router.post('/', validationCreateContact, controller.addContact)
 
-router.put('/:contactId', validationUpdateContact, controller.updateContact)
+router.put('/:contactId', validationUpdateStatusContact, controller.updateContact)
 
-router.patch('/:contactId', controller.updateContact)
+router.patch('/:contactId', validationUpdateContact, controller.updateContact)
 
-router.delete('/:contactId', validationUpdateStatusContact, controller.removeContact)
+router.delete('/:contactId', controller.removeContact)
 
 module.exports = router
