@@ -2,7 +2,8 @@ const Contacts = require('../repositories/contacts')
 
 const listContacts = async (req, res, next) => {
   try {
-    const contacts = await Contacts.getAllContacts()
+    const { _id } = req.user
+    const contacts = await Contacts.getAllContacts({ owner: _id })
     return res.status(200).json({ status: 'success', code: 200, data: { contacts } })
   } catch (error) {
     next(error)
@@ -11,7 +12,8 @@ const listContacts = async (req, res, next) => {
 
 const getContactById = async (req, res, next) => {
   try {
-    const contact = await Contacts.getContactById(req.params.contactId)
+    const userId = req.user.id
+    const contact = await Contacts.getContactById(userId, req.params.contactId)
     if (contact) {
       console.log(contact)
       return res.status(200).json({ status: 'success', code: 200, data: { contact } })
@@ -30,7 +32,8 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
   try {
-    const contact = await Contacts.addContact(req.body)
+    const userId = req.user.id
+    const contact = await Contacts.addContact(userId, req.body)
     if (contact) {
       return res.status(201).json({
         status: 'success',
@@ -76,8 +79,9 @@ const removeContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
   try {
+    const userId = req.user.id
     if (req.body) {
-      const contact = await Contacts.updateContact(req.params.contactId, req.body)
+      const contact = await Contacts.updateContact(userId, req.params.contactId, req.body)
       if (contact) {
         return res.status(200).json({
           status: 'success',

@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User } = require('../model/userSchema')
+const { SECRET_KEY } = process.env
+
 const register = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
@@ -37,7 +40,10 @@ const login = async (req, res) => {
       message: 'Wrong email or password',
     })
   }
-  const token = 'skjghrgjoit.wertgryrthy.grtgrtfhy'
+  const payload = {
+    id: user._id,
+  }
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })
   res.json({
     status: 'success',
     code: 200,

@@ -1,35 +1,42 @@
 const Contact = require('../model/contactSchema')
 
-const addContact = async body => {
+const addContact = async (userId, body) => {
   try {
-    const newContact = await Contact.create(body)
+    const newContact = await Contact.create({ owner: userId, ...body })
     return newContact
   } catch (error) {
     console.log(error)
   }
 }
 
-const getAllContacts = async () => {
+const getAllContacts = async userId => {
   try {
-    const allContacts = await Contact.find({})
+    const allContacts = await Contact.find(userId).populate('owner', '_id email')
     return allContacts
   } catch (error) {
     console.log(error)
   }
 }
 
-const getContactById = async contactId => {
+const getContactById = async (userId, contactId) => {
   try {
-    const findedContact = await Contact.findById(contactId)
+    const findedContact = await Contact.findById({ _id: contactId, owner: userId }).populate(
+      'owner',
+      '_id email',
+    )
     return findedContact
   } catch (error) {
     console.log(error)
   }
 }
 
-const updateContact = async (contactId, body) => {
+const updateContact = async (userId, contactId, body) => {
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(contactId, { ...body }, { new: true })
+    const updatedContact = await Contact.findByIdAndUpdate(
+      { _id: contactId, owner: userId },
+      { ...body },
+      { new: true },
+    ).populate('owner', '_id email subscription')
     return updatedContact
   } catch (error) {
     console.log(error)
