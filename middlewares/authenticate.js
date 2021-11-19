@@ -19,6 +19,11 @@ const authenticate = async (req, res, next) => {
           message: 'User not found',
         })
       }
+      if (!user.token) {
+        return res.status(401).json({
+          message: 'Unauthorized',
+        })
+      }
       req.user = user
       next()
     } catch (error) {
