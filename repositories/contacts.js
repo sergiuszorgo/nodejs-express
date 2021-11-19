@@ -9,9 +9,14 @@ const addContact = async (userId, body) => {
   }
 }
 
-const getAllContacts = async userId => {
+const getAllContacts = async (userId, query) => {
   try {
-    const allContacts = await Contact.find(userId).populate('owner', '_id email')
+    const { limit, page } = query
+    const skip = (page - 1) * limit
+    const allContacts = await Contact.find(userId, '_id name phone owner', {
+      skip,
+      limit: +limit,
+    }).populate('owner', '_id email')
     return allContacts
   } catch (error) {
     console.log(error)
