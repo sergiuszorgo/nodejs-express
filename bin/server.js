@@ -11,4 +11,5 @@ dbase
   })
   .catch(error => {
     console.log(`Server not running! Error: ${error.message}`)
+    process.exit(1)
   })
