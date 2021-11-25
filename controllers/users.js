@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const fs = require('fs/promises')
+const path = require('path')
 const { User } = require('../model/userSchema')
 const { SECRET_KEY } = process.env
+
+const avatarsDir = path.join(__dirname, '../public/avatars')
 
 const register = async (req, res) => {
   const { email, password } = req.body
@@ -54,6 +58,34 @@ const login = async (req, res) => {
   })
 }
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user
+  const { path: tempDir, originalname } = req.file
+  const resultUpload = path.join(avatarsDir, originalname)
+  try {
+    await fs.rename(tempDir, resultUpload)
+    const avatar = path.join('/avatars', originalname)
+    const result = await User.findByIdAndUpdate(_id, { avatar }, { new: true })
+    if (!result) {
+      return res.status(404).json({
+        status: 'error',
+        code: 404,
+        message: `User with id=${_id} not found`,
+      })
+    }
+    res.json({
+      status: 'success',
+      code: 200,
+      data: {
+        result,
+      },
+    })
+  } catch (error) {
+    await fs.unlink(tempDir)
+    throw error
+  }
+}
+
 const logout = async (req, res) => {
   const { _id } = req.user
   await User.findByIdAndUpdate(_id, { token: null })
@@ -64,4 +96,5 @@ module.exports = {
   register,
   login,
   logout,
+  updateAvatar,
 }
