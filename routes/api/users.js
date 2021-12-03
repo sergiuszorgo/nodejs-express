@@ -8,4 +8,5 @@ router.post('/register', validation(joiSchema), ctrlWrapper(ctrl.register))
 router.post('/login', validation(joiSchema), ctrlWrapper(ctrl.login))
 router.get('/logout', authenticate, ctrlWrapper(ctrl.logout))
 router.patch('/avatars', authenticate, upload.single('avatarURL'), ctrlWrapper(ctrl.updateAvatar))
+router.get('/verify/:verificationToken', ctrlWrapper(ctrl.verify))
 module.exports = router

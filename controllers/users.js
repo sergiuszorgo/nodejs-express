@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken')
 const fs = require('fs/promises')
 const path = require('path')
 const moment = require('moment')
+const { nanoid } = require('nanoid')
+const nodemailer = require('nodemailer')
+
+const nodemailerConfig = require('../helpers/sendmailconfig')
 const { User } = require('../model/userSchema')
 const { SECRET_KEY } = process.env
 
@@ -18,8 +22,20 @@ const register = async (req, res) => {
       message: `User with email=${email} already exist`,
     })
   }
+  const verificationToken = nanoid()
   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-  await User.create({ email, password: hashPassword })
+  await User.create({ email, password: hashPassword, verificationToken })
+  const mail = {
+    to: email,
+    subject: 'Подтверждение регистрации',
+    html: `<h3>Перейдите по <a href="http://localhost:3000/api/users/verify/${verificationToken}">ссылке</a> для подтверждения email</h3>`,
+  }
+  const transporter = nodemailer.createTransport(nodemailerConfig)
+  transporter
+    .sendMail(mail)
+    .then(() => console.log('Email отправлен'))
+    .catch(err => console.log(err.message))
+
   res.status(201).json({
     status: 'success',
     code: 201,
@@ -30,15 +46,8 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
-  if (!user) {
-    return res.status(404).json({
-      status: 'error',
-      code: 404,
-      message: `User with email=${email} not found`,
-    })
-  }
   const compareResult = bcrypt.compareSync(password, user.password)
-  if (!compareResult) {
+  if (!user || !user.verify || !compareResult) {
     return res.status(401).json({
       status: 'Unauthorized',
       code: 401,
@@ -95,9 +104,26 @@ const logout = async (req, res) => {
   res.status(204).json()
 }
 
+const verify = async (req, res) => {
+  const { verificationToken } = req.params
+  const user = await User.findOne({ verificationToken })
+  if (!user) {
+    return res.status(404).json({
+      status: 'error',
+      code: 404,
+      message: 'User not found',
+    })
+  }
+  await User.findByIdAndUpdate(user._id, { verificationToken: null, verify: true })
+  res.json({
+    message: 'Verify success',
+  })
+}
+
 module.exports = {
   register,
   login,
   logout,
   updateAvatar,
+  verify,
 }
