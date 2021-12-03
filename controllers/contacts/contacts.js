@@ -1,4 +1,4 @@
-const Contacts = require('../repositories/contacts')
+const Contacts = require('../../repositories/contacts')
 
 const listContacts = async (req, res, next) => {
   try {
@@ -49,7 +49,6 @@ const addContact = async (req, res, next) => {
       })
     }
   } catch (error) {
-    console.log(error) // проверка ошибки
     next(error)
   }
 }
